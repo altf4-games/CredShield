@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CredShield Backend Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        .status-bar {
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .status-item {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .status-label {
+            color: #888;
+            font-size: 0.9rem;
+            margin-right: 5px;
+        }
+
+        .status-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .test-section {
+            background-color: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        .test-section h2 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #aaa;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #0a0a0a;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: monospace;
+        }
+
+        button {
+            background-color: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #333;
+            border-color: #555;
+        }
+
+        button:active {
+            background-color: #1a1a1a;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .response-box {
+            background-color: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-box pre {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .success {
+            border-left: 3px solid #4CAF50;
+        }
+
+        .error {
+            border-left: 3px solid #f44336;
+        }
+
+        .info {
+            border-left: 3px solid #2196F3;
+        }
+
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+            color: #888;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge-success {
+            background-color: #1b5e20;
+            color: #4CAF50;
+        }
+
+        .badge-error {
+            background-color: #b71c1c;
+            color: #f44336;
+        }
+
+        .code {
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a0a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CredShield Backend Tester</h1>
+            <p class="subtitle">Test Zero-Knowledge Proof API Endpoints</p>
+        </header>
+
+        <div class="status-bar" id="statusBar">
+            <div class="status-item">
+                <span class="status-label">API URL:</span>
+                <span class="status-value code" id="apiUrl">http://localhost:3000</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Status:</span>
+                <span class="status-value" id="apiStatus">Checking...</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>1. Health Check</h2>
+            <button onclick="testHealth()">Check Backend Health</button>
+            <div id="healthResponse" class="response-box hidden"></div>
+        </div>
+
+        <div class="grid">
+            <div class="test-section">
+                <h2>2. Generate Proof</h2>
+                <div class="form-group">
+                    <label>GPA (0-10)</label>
+                    <input type="number" id="gpaGenerate" step="0.1" min="0" max="10" value="8.5" placeholder="e.g., 8.5">
+                </div>
+                <div class="form-group">
+                    <label>Threshold (0-10)</label>
+                    <input type="number" id="thresholdGenerate" step="0.1" min="0" max="10" value="7.0" placeholder="e.g., 7.0">
+                </div>
+                <button onclick="generateProof()">Generate Proof</button>
+                <div id="generateResponse" class="response-box hidden"></div>
+            </div>
+
+            <div class="test-section">
+                <h2>3. Verify Proof</h2>
+                <div class="form-group">
+                    <label>Proof (JSON object)</label>
+                    <textarea id="proofInput" placeholder='Paste proof object here, e.g., {"pi_a": [...], "pi_b": [...], "pi_c": [...], "protocol": "groth16", "curve": "bn128"}'></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Public Signals (JSON array)</label>
+                    <input type="text" id="publicSignalsInput" placeholder='["700", "1"]'>
+                </div>
+                <button onclick="verifyProof()">Verify Proof on Blockchain</button>
+                <div id="verifyResponse" class="response-box hidden"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Verify with Code (Simple!) ⭐</h2>
+            <p style="color: #888; margin-bottom: 15px;">Just enter the 8-character verification code from the proof generator</p>
+            <div class="form-group">
+                <label>Verification Code</label>
+                <input type="text" id="verificationCodeInput" placeholder="e.g., A1B2C3D4" maxlength="8" style="text-transform: uppercase; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px;">
+            </div>
+            <button onclick="verifyWithCode()">Verify with Code</button>
+            <div id="codeVerifyResponse" class="response-box hidden"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Check Eligibility</h2>
+                <div class="form-group">
+                    <label>GPA (0-10)</label>
+                    <input type="number" id="gpaEligibility" step="0.1" min="0" max="10" value="6.5" placeholder="e.g., 6.5">
+                </div>
+                <div class="form-group">
+                    <label>Threshold (0-10)</label>
+                    <input type="number" id="thresholdEligibility" step="0.1" min="0" max="10" value="7.0" placeholder="e.g., 7.0">
+                </div>
+                <button onclick="checkEligibility()">Check Eligibility</button>
+                <div id="eligibilityResponse" class="response-box hidden"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Generate with Document Text</h2>
+            <div class="form-group">
+                <label>Document Text (Academic Transcript)</label>
+                <textarea id="documentText" placeholder="Paste your academic transcript here. Example:
+
+University of Example
+Student Transcript
+Name: John Doe
+Student ID: 12345
+
+Academic Performance:
+Overall CGPA: 8.5/10.0
+Classification: First Class with Distinction"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Threshold (0-10)</label>
+                <input type="number" id="thresholdDocument" step="0.1" min="0" max="10" value="7.0" placeholder="e.g., 7.0">
+            </div>
+            <button onclick="generateProofWithDocument()">Generate Proof from Document</button>
+            <div id="documentResponse" class="response-box hidden"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>7. Generate Proof from Document (PDF/Image)</h2>
+            <div class="form-group">
+                <label>Upload Academic Document (PDF, PNG, JPG)</label>
+                <input type="file" id="pdfFile" accept=".pdf,.png,.jpg,.jpeg">
+            </div>
+            <div class="form-group">
+                <label>Threshold (0-10)</label>
+                <input type="number" id="thresholdPdf" step="0.1" min="0" max="10" value="7.0" placeholder="e.g., 7.0">
+            </div>
+            <button onclick="generateProofFromPDF()">Generate Proof from Document</button>
+            <div id="pdfResponse" class="response-box hidden"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>8. Proof Service Status</h2>
+            <button onclick="testProofStatus()">Check Proof Service</button>
+            <div id="statusResponse" class="response-box hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000';
+
+        async function testHealth() {
+            const responseBox = document.getElementById('healthResponse');
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Loading...</pre>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                
+                responseBox.className = 'response-box success';
+                responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                updateStatus('Healthy', true);
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}</pre>`;
+                updateStatus('Offline', false);
+            }
+        }
+
+        async function generateProof() {
+            const gpa = parseFloat(document.getElementById('gpaGenerate').value);
+            const threshold = parseFloat(document.getElementById('thresholdGenerate').value);
+            const responseBox = document.getElementById('generateResponse');
+
+            if (isNaN(gpa) || isNaN(threshold)) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter valid numbers for GPA and threshold</pre>';
+                return;
+            }
+
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Generating proof...</pre>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/proof/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ gpa, threshold })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    responseBox.className = 'response-box success';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseBox.className = 'response-box error';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        async function verifyProof() {
+            const proofInput = document.getElementById('proofInput').value;
+            const publicSignalsInput = document.getElementById('publicSignalsInput').value;
+            const responseBox = document.getElementById('verifyResponse');
+
+            if (!proofInput || proofInput.trim().length === 0) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter proof object</pre>';
+                return;
+            }
+
+            if (!publicSignalsInput || publicSignalsInput.trim().length === 0) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter public signals</pre>';
+                return;
+            }
+
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Verifying proof on blockchain...</pre>';
+
+            try {
+                const proof = JSON.parse(proofInput);
+                const publicSignals = JSON.parse(publicSignalsInput);
+
+                const response = await fetch(`${API_BASE_URL}/api/proof/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ proof, publicSignals })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.verified) {
+                    responseBox.className = 'response-box success';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseBox.className = 'response-box error';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}\n\nMake sure proof and publicSignals are valid JSON</pre>`;
+            }
+        }
+
+        async function verifyWithCode() {
+            const code = document.getElementById('verificationCodeInput').value.trim().toUpperCase();
+            const responseBox = document.getElementById('codeVerifyResponse');
+
+            if (!code || code.length !== 8) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter a valid 8-character verification code</pre>';
+                return;
+            }
+
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Verifying proof on blockchain...</pre>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/proof/verify-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.verified) {
+                    responseBox.className = 'response-box success';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseBox.className = 'response-box error';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        async function checkEligibility() {
+            const gpa = parseFloat(document.getElementById('gpaEligibility').value);
+            const threshold = parseFloat(document.getElementById('thresholdEligibility').value);
+            const responseBox = document.getElementById('eligibilityResponse');
+
+            if (isNaN(gpa) || isNaN(threshold)) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter valid numbers for GPA and threshold</pre>';
+                return;
+            }
+
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Checking eligibility...</pre>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/proof/check-eligibility`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ gpa, threshold })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.eligible) {
+                        responseBox.className = 'response-box success';
+                    } else {
+                        responseBox.className = 'response-box info';
+                    }
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseBox.className = 'response-box error';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        async function generateProofWithDocument() {
+            const documentText = document.getElementById('documentText').value;
+            const threshold = parseFloat(document.getElementById('thresholdDocument').value);
+            const responseBox = document.getElementById('documentResponse');
+
+            if (!documentText || documentText.trim().length < 10) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter document text (at least 10 characters)</pre>';
+                return;
+            }
+
+            if (isNaN(threshold)) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter a valid threshold</pre>';
+                return;
+            }
+
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Processing document and generating proof...</pre>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/proof/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ documentText, threshold })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    responseBox.className = 'response-box success';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseBox.className = 'response-box error';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}\n\nNote: Document processing requires Gemini API key to be configured.</pre>`;
+            }
+        }
+
+        async function generateProofFromPDF() {
+            const fileInput = document.getElementById('pdfFile');
+            const threshold = parseFloat(document.getElementById('thresholdPdf').value);
+            const responseBox = document.getElementById('pdfResponse');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please select a PDF file</pre>';
+                return;
+            }
+
+            if (isNaN(threshold)) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please enter a valid threshold</pre>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg'];
+            const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+            
+            if (!allowedExtensions.includes(fileExtension)) {
+                responseBox.className = 'response-box error';
+                responseBox.classList.remove('hidden');
+                responseBox.innerHTML = '<pre>Please upload a PDF or image file (PNG, JPG, JPEG)</pre>';
+                return;
+            }
+
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Uploading document and processing...</pre>';
+
+            try {
+                const formData = new FormData();
+                formData.append('document', file);
+                formData.append('threshold', threshold);
+
+                const response = await fetch(`${API_BASE_URL}/api/proof/generate-from-document`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    responseBox.className = 'response-box success';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseBox.className = 'response-box error';
+                    responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}\n\nNote: PDF processing requires Gemini API key to be configured for GPA extraction.</pre>`;
+            }
+        }
+
+        async function testProofStatus() {
+            const responseBox = document.getElementById('statusResponse');
+            responseBox.className = 'response-box info';
+            responseBox.classList.remove('hidden');
+            responseBox.innerHTML = '<pre>Loading...</pre>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/proof/status`);
+                const data = await response.json();
+                
+                responseBox.className = 'response-box success';
+                responseBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        function updateStatus(status, isHealthy) {
+            const statusElement = document.getElementById('apiStatus');
+            statusElement.textContent = status;
+            statusElement.style.color = isHealthy ? '#4CAF50' : '#f44336';
+        }
+
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html>
