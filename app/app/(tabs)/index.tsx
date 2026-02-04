@@ -1,98 +1,145 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { COLORS, TYPOGRAPHY, SPACING, COMMON_STYLES } from '@/constants/theme';
+import NothingCard from '@/components/NothingCard';
+import NothingButton from '@/components/NothingButton';
+import IDCard from '@/components/IDCard';
+import StatusDot from '@/components/StatusDot';
+import { router } from 'expo-router';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <ScrollView style={COMMON_STYLES.container}>
+      <View style={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>CredShield</Text>
+          <Text style={styles.subtitle}>Zero-Knowledge Proof System</Text>
+        </View>
+
+        {/* ID Card - Mock Data */}
+        <View style={styles.cardSection}>
+          <IDCard 
+            name="John Doe"
+            gpa={9.2}
+            verified={true}
+          />
+        </View>
+
+        {/* Status Card */}
+        <NothingCard style={styles.statusCard}>
+          <View style={styles.statusHeader}>
+            <StatusDot status="active" size={12} />
+            <Text style={styles.statusText}>System Online</Text>
+          </View>
+          <Text style={styles.statusSubtext}>
+            Backend connected • Ready to generate proofs
+          </Text>
+        </NothingCard>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          
+          <NothingCard style={styles.actionCard}>
+            <Text style={styles.cardTitle}>Generate Proof</Text>
+            <Text style={styles.cardDescription}>
+              Capture your academic document and generate a zero-knowledge proof
+            </Text>
+            <NothingButton 
+              title="Start" 
+              onPress={() => router.push('/(tabs)/generate')}
+              style={styles.actionButton}
+            />
+          </NothingCard>
+
+          <NothingCard style={styles.actionCard}>
+            <Text style={styles.cardTitle}>Verify Proof</Text>
+            <Text style={styles.cardDescription}>
+              Enter verification code to check a proof on the blockchain
+            </Text>
+            <NothingButton 
+              title="Verify" 
+              onPress={() => router.push('/(tabs)/verify')}
+              variant="secondary"
+              style={styles.actionButton}
+            />
+          </NothingCard>
+        </View>
+
+
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  content: {
+    padding: SPACING.lg,
+  },
+  header: {
+    marginBottom: SPACING.xl,
+  },
+  title: {
+    fontSize: TYPOGRAPHY.fontSize['4xl'],
+    fontWeight: TYPOGRAPHY.fontWeight.black,
+    color: COLORS.white,
+    marginBottom: SPACING.xs,
+  },
+  subtitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gray500,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  cardSection: {
+    marginBottom: SPACING.xl,
+  },
+  statusCard: {
+    marginBottom: SPACING.xl,
+  },
+  statusHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  statusText: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.white,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  statusSubtext: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gray500,
+  },
+  section: {
+    marginBottom: SPACING.xl,
+  },
+  sectionTitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gray400,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: SPACING.md,
+  },
+  actionCard: {
+    marginBottom: SPACING.md,
+  },
+  cardTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.white,
+    marginBottom: SPACING.xs,
+  },
+  cardDescription: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gray500,
+    lineHeight: TYPOGRAPHY.lineHeight.relaxed * TYPOGRAPHY.fontSize.sm,
+    marginBottom: SPACING.md,
+  },
+  actionButton: {
+    marginTop: SPACING.sm,
   },
 });
