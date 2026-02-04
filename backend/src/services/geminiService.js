@@ -169,7 +169,7 @@ Extract the GPA value:`;
     }
 
     try {
-      const visionModel = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const visionModel = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const imagePart = {
         inlineData: {
