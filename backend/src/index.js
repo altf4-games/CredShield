@@ -47,8 +47,10 @@ app.use('/api/proof', proofRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Accessible from emulator at: 10.0.2.2:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Contract: ${process.env.CONTRACT_ADDRESS || 'Not configured'}`);
 });
+

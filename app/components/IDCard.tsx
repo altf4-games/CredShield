@@ -22,7 +22,7 @@ export default function IDCard({ name, gpa, verified = true }: IDCardProps) {
           <Text style={styles.logo}>CredShield</Text>
           {verified && (
             <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}>✓ VERIFIED</Text>
+              <Text style={styles.verifiedText}>VERIFIED</Text>
             </View>
           )}
         </View>
@@ -99,10 +99,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs / 2,
   },
   name: {
-    fontSize: TYPOGRAPHY.fontSize['2xl'],
+    fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.white,
     marginBottom: SPACING.md,
+    flexWrap: 'wrap',
   },
   gpaSection: {
     flexDirection: 'row',

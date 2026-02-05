@@ -28,7 +28,6 @@ class GPACircuit {
     this.vkey = JSON.parse(fs.readFileSync(this.vkeyPath, 'utf8'));
     this.initialized = true;
 
-    console.log('✅ Real Circom circuit initialized');
     console.log(`   WASM: ${this.wasmPath}`);
     console.log(`   ZKey: ${this.zkeyPath}`);
   }
@@ -55,9 +54,9 @@ class GPACircuit {
         threshold: scaledThreshold.toString()
       };
 
-      console.log('🔐 Generating real ZK proof...');
-      console.log(`   Input GPA (private): ${gpa} (scaled: ${scaledGPA})`);
-      console.log(`   Threshold (public): ${threshold} (scaled: ${scaledThreshold})`);
+      console.log('Generating ZK proof...');
+      console.log(`Input GPA (private): ${gpa} (scaled: ${scaledGPA})`);
+      console.log(`Threshold (public): ${threshold} (scaled: ${scaledThreshold})`);
 
       // Generate witness and proof using real Circom circuit
       const { proof, publicSignals } = await groth16.fullProve(
@@ -66,8 +65,8 @@ class GPACircuit {
         this.zkeyPath
       );
 
-      console.log('✅ Real ZK proof generated!');
-      console.log(`   Public signals: [${publicSignals.join(', ')}]`);
+      console.log('ZK proof generated!');
+      console.log(`Public signals: [${publicSignals.join(', ')}]`);
 
       // Generate proof hash for tracking
       const proofString = JSON.stringify({
@@ -94,7 +93,7 @@ class GPACircuit {
         proofHash: proofHash
       };
     } catch (error) {
-      console.error('❌ Proof generation failed:', error.message);
+      console.error('Proof generation failed:', error.message);
       throw new Error(`Circom proof generation failed: ${error.message}`);
     }
   }
@@ -115,7 +114,7 @@ class GPACircuit {
         curve: proof.curve
       };
 
-      console.log('🔍 Verifying real ZK proof locally...');
+      console.log('Verifying real ZK proof locally...');
       
       const verified = await groth16.verify(
         this.vkey,
@@ -123,11 +122,11 @@ class GPACircuit {
         fullProof
       );
 
-      console.log(`   Local verification: ${verified ? '✅ PASSED' : '❌ FAILED'}`);
+      console.log(`Local verification: ${verified ? '✅ PASSED' : '❌ FAILED'}`);
 
       return verified;
     } catch (error) {
-      console.error('❌ Verification failed:', error.message);
+      console.error('Verification failed:', error.message);
       return false;
     }
   }
