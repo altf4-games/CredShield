@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Backend URL - update this to your backend URL
 const API_URL = 'http://10.0.2.2:3000/api';
 
 export interface ProofGenerationResponse {
