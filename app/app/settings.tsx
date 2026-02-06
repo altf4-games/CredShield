@@ -1,34 +1,26 @@
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { COLORS, TYPOGRAPHY, SPACING, COMMON_STYLES } from '@/constants/theme';
 import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
+import ConfirmModal from '@/components/ConfirmModal';
 import { router } from 'expo-router';
 
 export default function SettingsScreen() {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const handleClearCache = async () => {
-    Alert.alert(
-      'Clear All Data',
-      'This will remove all stored proofs and user data. Continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await SecureStore.deleteItemAsync('userData');
-              await SecureStore.deleteItemAsync('proofs');
-              await SecureStore.deleteItemAsync('onboardingCompleted');
-              Alert.alert('Success', 'All data cleared');
-              router.replace('/(tabs)');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear data');
-            }
-          },
-        },
-      ]
-    );
+    try {
+      await SecureStore.deleteItemAsync('userData');
+      await SecureStore.deleteItemAsync('proofHistory');
+      await SecureStore.deleteItemAsync('onboardingCompleted');
+      setShowConfirm(false);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Failed to clear data:', error);
+    }
   };
 
   return (
@@ -45,7 +37,7 @@ export default function SettingsScreen() {
 
           <NothingButton
             title="Clear All Data"
-            onPress={handleClearCache}
+            onPress={() => setShowConfirm(true)}
             variant="outline"
             fullWidth
             style={styles.button}
@@ -70,6 +62,30 @@ export default function SettingsScreen() {
             Clearing data will remove all proofs and user information from this device.This action cannot be undone.
           </Text>
         </View>
+
+        <ConfirmModal
+          visible={showConfirm}
+          title="Clear All Data"
+          message="This will permanently delete all your proofs and user data from this device. This action cannot be undone."
+          confirmText="Clear Data"
+          cancelText="Cancel"
+          onConfirm={handleClearCache}
+          onCancel={() => setShowConfirm(false)}
+          destructive
+        />
+
+        <ConfirmModal
+          visible={showSuccess}
+          title="Success"
+          message="All data has been cleared successfully."
+          confirmText="OK"
+          cancelText=""
+          onConfirm={() => {
+            setShowSuccess(false);
+            router.replace('/(tabs)');
+          }}
+          onCancel={() => {}}
+        />
       </View>
     </ScrollView>
   );
