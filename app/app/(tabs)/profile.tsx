@@ -169,6 +169,14 @@ export default function ProfileScreen() {
             fullWidth
             style={styles.githubButton}
           />
+          
+          <NothingButton
+            title="View Contract on Etherscan"
+            onPress={() => Linking.openURL('https://sepolia.etherscan.io/address/0xBa23c88ef61DF6b8fCD11759AC503DE13D94F0Ed')}
+            variant="outline"
+            fullWidth
+            style={styles.contractButton}
+          />
         </View>
       </View>
     </ScrollView>
@@ -327,5 +335,8 @@ const styles = StyleSheet.create({
   },
   githubButton: {
     marginTop: SPACING.sm,
+  },
+  contractButton: {
+    marginTop: SPACING.md,
   },
 });
