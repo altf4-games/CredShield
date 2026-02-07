@@ -49,8 +49,7 @@ temp/
 # Circuit compilation artifacts (keep source .circom files)
 circuits/*.r1cs
 circuits/*.sym
-circuits/*_js/
-circuits/*.zkey
+# circuits/*_js/  # COMMENTED OUT - needed for Vercel deployment
 circuits/*.ptau
 
 # Test artifacts

@@ -29,10 +29,11 @@ class ProofService {
       }
 
       const contractABI = [
-        'function verifyProof(uint[2] memory a, uint[2][2] memory b, uint[2] memory c, uint[1] memory input) public returns (bool)',
-        'function getVerification(bytes32 requestId) public view returns (address student, uint256 timestamp, bool verified)',
-        'event ProofVerified(bytes32 indexed requestId, address indexed student, uint256 timestamp)',
-        'event ProofRejected(bytes32 indexed requestId, address indexed student, uint256 timestamp)'
+        'function verifyProof(bytes32 code, string memory studentName, uint[2] memory a, uint[2][2] memory b, uint[2] memory c, uint[2] memory pubSignals) public returns (bool)',
+        'function getVerification(bytes32 code) public view returns (address submitter, string memory studentName, uint256 threshold, bool verified, uint256 timestamp)',
+        'function isCodeUsed(bytes32 code) public view returns (bool)',
+        'event ProofVerified(bytes32 indexed verificationCode, address indexed student, uint256 threshold, uint256 timestamp)',
+        'event ProofRejected(bytes32 indexed verificationCode, address indexed student, uint256 timestamp)'
       ];
 
       this.contract = new ethers.Contract(contractAddress, contractABI, this.signer);
@@ -87,7 +88,7 @@ class ProofService {
     return gpaCircuit.verifyProof(proof, publicSignals);
   }
 
-  async verifyProofOnChain(proof, publicSignals) {
+  async verifyProofOnChain(proof, publicSignals, verificationCode, studentName) {
     if (!this.initialized) {
       await this.initialize();
     }
@@ -103,9 +104,17 @@ class ProofService {
       const a = formattedProof.a;
       const b = formattedProof.b;
       const c = formattedProof.c;
-      const input = [publicSignals[0]];
+      
+      // Convert verification code to bytes32
+      const codeBytes32 = ethers.id(verificationCode);
+      
+      // Pass both public signals: [result, threshold]
+      const pubSignalsArray = [
+        publicSignals[0], // result (1 or 0)
+        publicSignals[1]  // threshold (scaled by 100)
+      ];
 
-      const tx = await this.contract.verifyProof(a, b, c, input);
+      const tx = await this.contract.verifyProof(codeBytes32, studentName, a, b, c, pubSignalsArray);
       const receipt = await tx.wait();
 
       return {
@@ -119,7 +128,7 @@ class ProofService {
     }
   }
 
-  async verifyProof(proof, publicSignals) {
+  async verifyProof(proof, publicSignals, verificationCode, studentName) {
     const localVerification = await this.verifyProofLocally(proof, publicSignals);
     
     if (!localVerification) {
@@ -131,16 +140,60 @@ class ProofService {
       };
     }
 
-    const onChainResult = await this.verifyProofOnChain(proof, publicSignals);
+    const onChainResult = await this.verifyProofOnChain(proof, publicSignals, verificationCode, studentName);
     
     return {
-      verified: onChainResult.verified,
+      verified: true,
       localVerification: true,
-      blockchainVerification: onChainResult.verified,
+      blockchainVerification: true,
       txHash: onChainResult.txHash,
       blockNumber: onChainResult.blockNumber,
-      timestamp: onChainResult.timestamp
+      timestamp: onChainResult.timestamp,
+      message: 'Proof verified successfully on blockchain'
     };
+  }
+
+  async getVerificationFromBlockchain(verificationCode) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    try {
+      // Convert verification code to bytes32
+      const codeBytes32 = ethers.id(verificationCode);
+
+      // Query contract for verification record
+      const result = await this.contract.getVerification(codeBytes32);
+
+      // result is [submitter, studentName, threshold, verified, timestamp]
+      const submitter = result[0];
+      const studentName = result[1];
+      const threshold = result[2];
+      const verified = result[3];
+      const timestamp = result[4];
+
+      // Check if record exists (timestamp will be 0 if not)
+      const exists = timestamp.toString() !== '0';
+
+      return {
+        exists: exists,
+        submitter: submitter,
+        studentName: studentName,
+        threshold: Number(threshold),
+        verified: verified,
+        timestamp: exists ? new Date(Number(timestamp) * 1000).toISOString() : null
+      };
+    } catch (error) {
+      console.error('Blockchain query error:', error.message);
+      return {
+        exists: false,
+        submitter: ethers.ZeroAddress,
+        studentName: '',
+        threshold: 0,
+        verified: false,
+        timestamp: null
+      };
+    }
   }
 
   async checkEligibility(gpa, threshold) {

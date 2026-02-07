@@ -2,7 +2,6 @@ const { Router } = require('express');
 const proofService = require('../services/proofService');
 const geminiService = require('../services/geminiService');
 const documentProcessor = require('../services/documentProcessor');
-const proofStorage = require('../services/proofStorage');
 const { 
   validateProofGeneration, 
   validateProofVerification,
@@ -156,17 +155,18 @@ router.post('/generate-from-document', async (req, res, next) => {
       const actualGPA = studentInfo.gpa;
       const studentName = studentInfo.name;
 
+      // Generate proof off-chain
       const proofResult = await proofService.generateProof(actualGPA, threshold);
 
-      const verificationCode = proofStorage.storeProof(
+      // Generate verification code
+      const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      // Submit proof to blockchain immediately
+      const blockchainResult = await proofService.verifyProof(
         proofResult.proof,
         proofResult.publicSignals,
-        {
-          ...proofResult.metadata,
-          extractedGPA: actualGPA,
-          studentName: studentName,
-          fileType: mimeType
-        }
+        verificationCode,
+        studentName
       );
 
       res.json({
@@ -174,13 +174,15 @@ router.post('/generate-from-document', async (req, res, next) => {
         studentName: studentName,
         extractedGPA: actualGPA,
         fileType: mimeType,
-        proof: proofResult.proof,
-        publicSignals: proofResult.publicSignals,
-        proofHash: proofResult.proofHash,
-        metadata: proofResult.metadata,
         verificationCode: verificationCode,
-        verificationUrl: `/api/proof/verify-code/${verificationCode}`,
-        message: `Proof generated for ${studentName}. Share code: ${verificationCode}`
+        txHash: blockchainResult.txHash,
+        blockNumber: blockchainResult.blockNumber,
+        metadata: {
+          ...proofResult.metadata,
+          studentName: studentName,
+          onChain: true
+        },
+        message: `Proof verified on blockchain. Transaction: ${blockchainResult.txHash}`
       });
     } catch (error) {
       next(error);
@@ -199,29 +201,28 @@ router.post('/verify-code', async (req, res, next) => {
       });
     }
 
-    const storedData = proofStorage.getProof(code);
+    // Query blockchain for verification record
+    const verificationRecord = await proofService.getVerificationFromBlockchain(code);
 
-    if (!storedData) {
+    if (!verificationRecord.exists) {
       return res.status(404).json({
         success: false,
-        error: 'Invalid or expired verification code'
+        error: 'Verification code not found on blockchain'
       });
     }
 
-    const verificationResult = await proofService.verifyProof(
-      storedData.proof,
-      storedData.publicSignals
-    );
-
     res.json({
       success: true,
-      verified: verificationResult.verified,
+      verified: verificationRecord.verified,
       code: code,
-      metadata: storedData.metadata,
-      txHash: verificationResult.txHash,
-      blockNumber: verificationResult.blockNumber,
-      timestamp: new Date().toISOString(),
-      message: verificationResult.verified 
+      metadata: {
+        submitter: verificationRecord.submitter,
+        studentName: verificationRecord.studentName,
+        threshold: verificationRecord.threshold / 100,
+        verified: verificationRecord.verified,
+        timestamp: verificationRecord.timestamp
+      },
+      message: verificationRecord.verified 
         ? 'Proof verified successfully on blockchain' 
         : 'Proof verification failed'
     });
@@ -233,29 +234,28 @@ router.post('/verify-code', async (req, res, next) => {
 router.get('/verify-code/:code', async (req, res, next) => {
   try {
     const code = req.params.code;
-    const storedData = proofStorage.getProof(code);
+    
+    // Query blockchain for verification record
+    const verificationRecord = await proofService.getVerificationFromBlockchain(code);
 
-    if (!storedData) {
+    if (!verificationRecord.exists) {
       return res.status(404).json({
         success: false,
-        error: 'Invalid or expired verification code'
+        error: 'Verification code not found on blockchain'
       });
     }
 
-    const verificationResult = await proofService.verifyProof(
-      storedData.proof,
-      storedData.publicSignals
-    );
-
     res.json({
       success: true,
-      verified: verificationResult.verified,
+      verified: verificationRecord.verified,
       code: code,
-      metadata: storedData.metadata,
-      txHash: verificationResult.txHash,
-      blockNumber: verificationResult.blockNumber,
-      timestamp: new Date().toISOString(),
-      message: verificationResult.verified 
+      metadata: {
+        studentAddress: verificationRecord.student,
+        threshold: verificationRecord.threshold / 100, // Scale back down
+        verified: verificationRecord.verified,
+        timestamp: verificationRecord.timestamp
+      },
+      message: verificationRecord.verified 
         ? 'Proof verified successfully on blockchain' 
         : 'Proof verification failed'
     });

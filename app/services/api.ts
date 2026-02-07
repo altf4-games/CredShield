@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_URL = 'http://10.0.2.2:3000/api';
+// const API_URL = __DEV__ 
+//   ? 'http://10.0.2.2:3000/api'
+//   : 'https://credshield.vercel.app/api';
+
+  const API_URL = 'https://credshield.vercel.app/api';
 
 export interface ProofGenerationResponse {
   success: boolean;
@@ -31,16 +35,12 @@ export interface VerificationResponse {
   verified: boolean;
   code: string;
   metadata: {
+    submitter: string;
     studentName: string;
     threshold: number;
-    meetsRequirement: boolean;
-    generated: string;
-    extractedGPA: number;
-    fileType: string;
+    verified: boolean;
+    timestamp: string;
   };
-  txHash: string;
-  blockNumber: number;
-  timestamp: string;
   message: string;
 }
 

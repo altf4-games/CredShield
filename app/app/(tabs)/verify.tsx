@@ -41,16 +41,26 @@ export default function VerifyScreen() {
 
       if (response.success && response.verified) {
         setVerificationResult(response);
+        
+        const details = [
+          { label: 'Student', value: response.metadata.studentName },
+          { label: 'Threshold', value: response.metadata.threshold.toString() },
+          { label: 'Result', value: response.metadata.verified ? 'VERIFIED ✓' : 'FAILED ✗' },
+        ];
+        
+        // Add timestamp if available
+        if (response.metadata.timestamp) {
+          details.push({ 
+            label: 'Verified On', 
+            value: new Date(response.metadata.timestamp).toLocaleDateString() 
+          });
+        }
+        
         showModal(
           'success',
           'Proof Verified',
           'The proof has been successfully verified on the blockchain.',
-          [
-            { label: 'Student', value: response.metadata.studentName },
-            { label: 'Threshold', value: response.metadata.threshold.toString() },
-            { label: 'Result', value: response.metadata.meetsRequirement ? 'PASSED' : 'FAILED' },
-            { label: 'TX Hash', value: response.txHash.substring(0, 20) + '...' },
-          ]
+          details
         );
       } else {
         showModal('error', 'Verification Failed', response.message || 'Invalid or expired code');
@@ -112,29 +122,27 @@ export default function VerifyScreen() {
               <Text style={styles.resultLabel}>Result</Text>
               <Text style={[
                 styles.resultValue,
-                verificationResult.metadata.meetsRequirement ? styles.passText : styles.failText
+                verificationResult.metadata.verified ? styles.passText : styles.failText
               ]}>
-                {verificationResult.metadata.meetsRequirement ? 'PASSED ✓' : 'FAILED ✗'}
+                {verificationResult.metadata.verified ? 'VERIFIED ✓' : 'FAILED ✗'}
               </Text>
             </View>
 
-            <View style={styles.divider} />
-
-            <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>TX Hash</Text>
-              <Text style={styles.hashText} numberOfLines={1} ellipsizeMode="middle">
-                {verificationResult.txHash}
-              </Text>
-            </View>
-
-            <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Block</Text>
-              <Text style={styles.resultValue}>{verificationResult.blockNumber}</Text>
-            </View>
+            {verificationResult.metadata.timestamp && (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.resultRow}>
+                  <Text style={styles.resultLabel}>Verified On</Text>
+                  <Text style={styles.resultValue}>
+                    {new Date(verificationResult.metadata.timestamp).toLocaleString()}
+                  </Text>
+                </View>
+              </>
+            )}
 
             <View style={styles.privacyNote}>
               <Text style={styles.privacyText}>
-                Actual GPA remains private
+                Actual GPA remains private. Only threshold verification is disclosed.
               </Text>
             </View>
           </NothingCard>
