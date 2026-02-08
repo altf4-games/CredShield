@@ -151,6 +151,23 @@ router.post('/generate-from-document', async (req, res, next) => {
       const fileBuffer = req.file.buffer;
       const mimeType = req.file.mimetype;
       
+      // Validate document against reference images
+      console.log('Validating document with reference stamps...');
+      const validationResult = await geminiService.validateDocumentWithReferences(fileBuffer, mimeType);
+      
+      console.log(`Validation result: ${validationResult.valid ? 'VALID' : 'INVALID'}, Confidence: ${validationResult.confidence}%`);
+      
+      // Reject if validation fails with low confidence
+      if (!validationResult.valid || validationResult.confidence < 50) {
+        return res.status(400).json({
+          success: false,
+          error: 'Document validation failed',
+          reason: validationResult.reason,
+          confidence: validationResult.confidence,
+          message: 'The uploaded document does not match the authentic college marksheet format. Please ensure you are uploading an original, unmodified marksheet with official stamps and signatures.'
+        });
+      }
+      
       const studentInfo = await geminiService.extractStudentInfo(fileBuffer, mimeType);
       const actualGPA = studentInfo.gpa;
       const studentName = studentInfo.name;
@@ -177,6 +194,10 @@ router.post('/generate-from-document', async (req, res, next) => {
         verificationCode: verificationCode,
         txHash: blockchainResult.txHash,
         blockNumber: blockchainResult.blockNumber,
+        validation: {
+          confidence: validationResult.confidence,
+          reason: validationResult.reason
+        },
         metadata: {
           ...proofResult.metadata,
           studentName: studentName,
