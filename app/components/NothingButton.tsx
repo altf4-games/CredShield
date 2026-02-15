@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, ANIMATION } from '@/constants/theme';
+import { TYPOGRAPHY, SPACING, BORDER_RADIUS } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface NothingButtonProps {
   title: string;
@@ -23,10 +24,49 @@ export default function NothingButton({
   fullWidth = false,
   style,
 }: NothingButtonProps) {
+  const { theme } = useTheme();
+
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'primary':
+        return {
+          backgroundColor: theme.colors.primary,
+          borderColor: theme.colors.primary,
+        };
+      case 'secondary':
+        return {
+          backgroundColor: theme.colors.surfaceVariant,
+          borderColor: theme.colors.border,
+        };
+      case 'outline':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: theme.colors.primary,
+        };
+      case 'ghost':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+        };
+    }
+  };
+
+  const getTextColor = () => {
+    switch (variant) {
+      case 'primary':
+        return theme.colors.background;
+      case 'secondary':
+        return theme.colors.text;
+      case 'outline':
+      case 'ghost':
+        return theme.colors.primary;
+    }
+  };
+
   const buttonStyle = [
     styles.button,
-    styles[variant],
     styles[size],
+    getVariantStyles(),
     fullWidth && styles.fullWidth,
     (disabled || loading) && styles.disabled,
     style,
@@ -34,9 +74,11 @@ export default function NothingButton({
 
   const textStyle = [
     styles.text,
-    styles[`${variant}Text`] as TextStyle,
     styles[`${size}Text`] as TextStyle,
+    { color: getTextColor() },
   ];
+
+  const spinnerColor = variant === 'primary' ? theme.colors.background : theme.colors.primary;
 
   return (
     <TouchableOpacity
@@ -46,13 +88,14 @@ export default function NothingButton({
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? COLORS.background : COLORS.primary} />
+        <ActivityIndicator color={spinnerColor} />
       ) : (
         <Text style={textStyle}>{title}</Text>
       )}
     </TouchableOpacity>
   );
 }
+
 
 const styles = StyleSheet.create({
   button: {
@@ -63,25 +106,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   
-  // Variants
-  primary: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  secondary: {
-    backgroundColor: COLORS.surfaceVariant,
-    borderColor: COLORS.border,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderColor: COLORS.primary,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-  },
-  
-  // Sizes
   sm: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
@@ -98,7 +122,6 @@ const styles = StyleSheet.create({
     minHeight: 56,
   },
   
-  // States
   disabled: {
     opacity: 0.5,
   },
@@ -106,26 +129,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   
-  // Text styles
   text: {
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     textAlign: 'center',
-  },
-  primaryText: {
-    color: COLORS.background,
-    fontSize: TYPOGRAPHY.fontSize.base,
-  },
-  secondaryText: {
-    color: COLORS.white,
-    fontSize: TYPOGRAPHY.fontSize.base,
-  },
-  outlineText: {
-    color: COLORS.primary,
-    fontSize: TYPOGRAPHY.fontSize.base,
-  },
-  ghostText: {
-    color: COLORS.primary,
-    fontSize: TYPOGRAPHY.fontSize.base,
   },
   smText: {
     fontSize: TYPOGRAPHY.fontSize.sm,

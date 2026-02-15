@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { COLORS, TYPOGRAPHY, SPACING, COMMON_STYLES } from '@/constants/theme';
+import { TYPOGRAPHY, SPACING } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import IDCard from '@/components/IDCard';
@@ -11,6 +12,7 @@ import { router } from 'expo-router';
 import apiService from '@/services/api';
 
 export default function HomeScreen() {
+  const { theme } = useTheme();
   const [userData, setUserData] = useState<{name: string, gpa: number, verificationCode?: string} | null>(null);
   const [backendOnline, setBackendOnline] = useState(false);
 
@@ -42,15 +44,13 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView style={COMMON_STYLES.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
-        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>CredShield</Text>
-          <Text style={styles.subtitle}>Zero-Knowledge Proof System</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>CredShield</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textTertiary }]}>Zero-Knowledge Proof System</Text>
         </View>
 
-        {/* ID Card - Show only if user data exists */}
         {userData && (
           <View style={styles.cardSection}>
             <IDCard 
@@ -61,15 +61,14 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Status Card */}
         <NothingCard style={styles.statusCard}>
           <View style={styles.statusHeader}>
             <StatusDot status={backendOnline ? "active" : "inactive"} size={12} />
-            <Text style={styles.statusText}>
+            <Text style={[styles.statusText, { color: theme.colors.text }]}>
               {backendOnline ? 'System Online' : 'Backend Offline'}
             </Text>
           </View>
-          <Text style={styles.statusSubtext}>
+          <Text style={[styles.statusSubtext, { color: theme.colors.textTertiary }]}>
             {backendOnline 
               ? 'Backend connected • Ready to generate proofs'
               : 'Check backend server connection'
@@ -77,13 +76,12 @@ export default function HomeScreen() {
           </Text>
         </NothingCard>
 
-        {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Quick Actions</Text>
           
           <NothingCard style={styles.actionCard}>
-            <Text style={styles.cardTitle}>Generate Proof</Text>
-            <Text style={styles.cardDescription}>
+            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Generate Proof</Text>
+            <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
               Capture your academic document and generate a zero-knowledge proof
             </Text>
             <NothingButton 
@@ -94,8 +92,8 @@ export default function HomeScreen() {
           </NothingCard>
 
           <NothingCard style={styles.actionCard}>
-            <Text style={styles.cardTitle}>Verify Proof</Text>
-            <Text style={styles.cardDescription}>
+            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Verify Proof</Text>
+            <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
               Enter verification code to check a proof on the blockchain
             </Text>
             <NothingButton 
@@ -111,7 +109,11 @@ export default function HomeScreen() {
   );
 }
 
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     padding: SPACING.lg,
   },
@@ -121,12 +123,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: TYPOGRAPHY.fontSize['4xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     textTransform: 'uppercase',
     letterSpacing: 2,
   },
@@ -145,11 +145,9 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
   },
   statusSubtext: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
   },
   section: {
     marginBottom: SPACING.xl,
@@ -157,7 +155,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gray400,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: SPACING.md,
@@ -168,12 +165,10 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
   },
   cardDescription: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     lineHeight: TYPOGRAPHY.lineHeight.relaxed * TYPOGRAPHY.fontSize.sm,
     marginBottom: SPACING.md,
   },
@@ -181,3 +176,4 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
 });
+

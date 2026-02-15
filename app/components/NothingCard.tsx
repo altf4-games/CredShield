@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS, BORDER_RADIUS, SPACING } from '@/constants/theme';
+import { BORDER_RADIUS, SPACING } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface NothingCardProps {
   children: ReactNode;
@@ -15,9 +16,15 @@ export default function NothingCard({
   padding = 'md',
   noPadding = false,
 }: NothingCardProps) {
+  const { theme } = useTheme();
+
   return (
     <View style={[
       styles.card,
+      { 
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.border,
+      },
       !noPadding && { padding: SPACING[padding] },
       style
     ]}>
@@ -28,9 +35,7 @@ export default function NothingCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
 });

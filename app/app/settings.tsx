@@ -1,13 +1,15 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { COLORS, TYPOGRAPHY, SPACING, COMMON_STYLES } from '@/constants/theme';
+import { TYPOGRAPHY, SPACING } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import ConfirmModal from '@/components/ConfirmModal';
 import { router } from 'expo-router';
 
 export default function SettingsScreen() {
+  const { theme } = useTheme();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -24,14 +26,14 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={COMMON_STYLES.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.subtitle}>Manage your data and preferences</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.textTertiary }]}>Manage your data and preferences</Text>
 
         <NothingCard style={styles.card}>
-          <Text style={styles.cardTitle}>Data Management</Text>
-          <Text style={styles.cardDescription}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Data Management</Text>
+          <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
             Clear all locally stored proofs and user information
           </Text>
 
@@ -45,20 +47,20 @@ export default function SettingsScreen() {
         </NothingCard>
 
         <NothingCard style={styles.card}>
-          <Text style={styles.cardTitle}>Storage Info</Text>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Storage Info</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>User Data</Text>
-            <Text style={styles.value}>Secure Store</Text>
+            <Text style={[styles.label, { color: theme.colors.textTertiary }]}>User Data</Text>
+            <Text style={[styles.value, { color: theme.colors.text }]}>Secure Store</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Encryption</Text>
-            <Text style={styles.value}>Device Keychain</Text>
+            <Text style={[styles.label, { color: theme.colors.textTertiary }]}>Encryption</Text>
+            <Text style={[styles.value, { color: theme.colors.text }]}>Device Keychain</Text>
           </View>
         </NothingCard>
 
-        <View style={styles.warningBox}>
-          <Text style={styles.warningTitle}>⚠️ Warning</Text>
-          <Text style={styles.warningText}>
+        <View style={[styles.warningBox, { backgroundColor: theme.colors.surfaceVariant, borderLeftColor: theme.colors.warning }]}>
+          <Text style={[styles.warningTitle, { color: theme.colors.warning }]}>⚠️ Warning</Text>
+          <Text style={[styles.warningText, { color: theme.colors.textSecondary }]}>
             Clearing data will remove all proofs and user information from this device.This action cannot be undone.
           </Text>
         </View>
@@ -92,18 +94,19 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     padding: SPACING.lg,
   },
   title: {
     fontSize: TYPOGRAPHY.fontSize['3xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     marginBottom: SPACING.xl,
   },
   card: {
@@ -112,12 +115,10 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
   },
   cardDescription: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     marginBottom: SPACING.lg,
   },
   button: {
@@ -129,35 +130,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   label: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   value: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
   },
   warningBox: {
-    backgroundColor: COLORS.surfaceVariant,
     borderRadius: 8,
     padding: SPACING.md,
     borderLeftWidth: 3,
-    borderLeftColor: COLORS.warning,
   },
   warningTitle: {
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.warning,
     marginBottom: SPACING.sm,
   },
   warningText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray400,
     lineHeight: TYPOGRAPHY.lineHeight.relaxed * TYPOGRAPHY.fontSize.sm,
   },
 });

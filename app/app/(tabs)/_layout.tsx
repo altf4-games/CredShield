@@ -1,19 +1,23 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { COLORS, TYPOGRAPHY } from '@/constants/theme';
+import { TYPOGRAPHY } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/ThemeContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function TabLayout() {
+  const { theme } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.gray600,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.gray600,
         tabBarStyle: {
-          backgroundColor: COLORS.background,
+          backgroundColor: theme.colors.background,
           borderTopWidth: 1,
-          borderTopColor: COLORS.border,
+          borderTopColor: theme.colors.border,
           height: Platform.OS === 'ios' ? 88 : 68,
           paddingBottom: Platform.OS === 'ios' ? 24 : 12,
         },
@@ -23,16 +27,18 @@ export default function TabLayout() {
           textTransform: 'uppercase',
           letterSpacing: 1,
         },
+        headerShown: true,
         headerStyle: {
-          backgroundColor: COLORS.background,
+          backgroundColor: theme.colors.background,
           borderBottomWidth: 1,
-          borderBottomColor: COLORS.border,
+          borderBottomColor: theme.colors.border,
         },
-        headerTintColor: COLORS.white,
+        headerTintColor: theme.colors.text,
         headerTitleStyle: {
           fontWeight: TYPOGRAPHY.fontWeight.bold,
           fontSize: TYPOGRAPHY.fontSize.lg,
         },
+        headerRight: () => <ThemeToggle />,
       }}
     >
       <Tabs.Screen

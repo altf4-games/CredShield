@@ -3,7 +3,8 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as SecureStore from 'expo-secure-store';
-import { COLORS, TYPOGRAPHY, SPACING, COMMON_STYLES } from '@/constants/theme';
+import { TYPOGRAPHY, SPACING } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import NothingInput from '@/components/NothingInput';
@@ -12,6 +13,7 @@ import apiService from '@/services/api';
 import { router } from 'expo-router';
 
 export default function GenerateScreen() {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [threshold, setThreshold] = useState('7.0');
   const [uploadedFile, setUploadedFile] = useState<{uri: string, type: 'image' | 'pdf'} | null>(null);
@@ -150,16 +152,16 @@ export default function GenerateScreen() {
   };
 
   return (
-    <ScrollView style={COMMON_STYLES.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Generate Proof</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Generate Proof</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.textTertiary }]}>
           Upload your academic transcript
         </Text>
 
         <NothingCard style={styles.card}>
-          <Text style={styles.cardTitle}>Threshold GPA</Text>
-          <Text style={styles.cardDescription}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Threshold GPA</Text>
+          <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
             Enter the minimum GPA requirement to verify against
           </Text>
 
@@ -174,8 +176,8 @@ export default function GenerateScreen() {
         </NothingCard>
 
         <NothingCard style={styles.card}>
-          <Text style={styles.cardTitle}>Camera Capture</Text>
-          <Text style={styles.cardDescription}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Camera Capture</Text>
+          <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
             Take a photo of your official academic transcript
           </Text>
 
@@ -189,8 +191,8 @@ export default function GenerateScreen() {
         </NothingCard>
 
         <NothingCard style={styles.card}>
-          <Text style={styles.cardTitle}>PDF Upload</Text>
-          <Text style={styles.cardDescription}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>PDF Upload</Text>
+          <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
             Upload a PDF of your academic transcript (for emulators)
           </Text>
 
@@ -205,11 +207,11 @@ export default function GenerateScreen() {
         </NothingCard>
 
         {uploadedFile && loading && (
-          <View style={styles.uploadedInfo}>
-            <Text style={styles.uploadedText}>
+          <View style={[styles.uploadedInfo, { backgroundColor: theme.colors.surfaceVariant, borderLeftColor: theme.colors.success }]}>
+            <Text style={[styles.uploadedText, { color: theme.colors.success }]}>
               {uploadedFile.type === 'pdf' ? 'PDF' : 'Photo'} uploaded
             </Text>
-            <Text style={styles.uploadedSubtext}>
+            <Text style={[styles.uploadedSubtext, { color: theme.colors.textSecondary }]}>
               Processing with AI and generating ZK proof...
             </Text>
           </View>
@@ -231,18 +233,19 @@ export default function GenerateScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     padding: SPACING.lg,
   },
   title: {
     fontSize: TYPOGRAPHY.fontSize['3xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     marginBottom: SPACING.xl,
   },
   card: {
@@ -251,12 +254,10 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
   },
   cardDescription: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     marginBottom: SPACING.lg,
   },
   input: {
@@ -266,20 +267,16 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   uploadedInfo: {
-    backgroundColor: COLORS.surfaceVariant,
     borderRadius: 8,
     padding: SPACING.md,
     borderLeftWidth: 3,
-    borderLeftColor: COLORS.success,
   },
   uploadedText: {
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.success,
     marginBottom: SPACING.xs,
   },
   uploadedSubtext: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray400,
   },
 });

@@ -3,7 +3,8 @@ import { useState, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as Clipboard from 'expo-clipboard';
-import { COLORS, TYPOGRAPHY, SPACING, COMMON_STYLES } from '@/constants/theme';
+import { TYPOGRAPHY, SPACING } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import { router } from 'expo-router';
@@ -18,6 +19,7 @@ interface Proof {
 }
 
 export default function ProfileScreen() {
+  const { theme } = useTheme();
   const [userData, setUserData] = useState<{name: string, gpa: number} | null>(null);
   const [proofs, setProofs] = useState<Proof[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -83,35 +85,35 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView style={COMMON_STYLES.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Profile</Text>
 
         <NothingCard style={styles.profileCard}>
           <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
+            <View style={[styles.avatar, { backgroundColor: theme.colors.primary, borderColor: theme.colors.border }]}>
+              <Text style={[styles.avatarText, { color: theme.colors.background }]}>
                 {userData ? getInitials(userData.name) : 'ZK'}
               </Text>
             </View>
           </View>
           
-          <Text style={styles.userName}>
+          <Text style={[styles.userName, { color: theme.colors.text }]}>
             {userData ? userData.name : 'No Proof Generated'}
           </Text>
-          <Text style={styles.userSubtitle}>Zero-Knowledge Identity</Text>
+          <Text style={[styles.userSubtitle, { color: theme.colors.textTertiary }]}>Zero-Knowledge Identity</Text>
         </NothingCard>
 
         {proofs.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Proof History ({proofs.length})</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Proof History ({proofs.length})</Text>
             {proofs.map((proof, index) => (
               <NothingCard key={index} style={styles.proofCard}>
                 <View style={styles.proofHeader}>
-                  <Text style={styles.proofName}>{proof.name}</Text>
+                  <Text style={[styles.proofName, { color: theme.colors.text }]}>{proof.name}</Text>
                   <Text style={[
                     styles.resultBadge,
-                    proof.result ? styles.resultPass : styles.resultFail
+                    { backgroundColor: proof.result ? theme.colors.success : theme.colors.error, color: proof.result ? theme.colors.background : theme.colors.text }
                   ]}>
                     {proof.result ? 'PASSED' : 'FAILED'}
                   </Text>
@@ -119,27 +121,27 @@ export default function ProfileScreen() {
                 
                 <View style={styles.proofDetails}>
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>GPA</Text>
-                    <Text style={styles.detailValue}>{proof.gpa.toFixed(2)}</Text>
+                    <Text style={[styles.detailLabel, { color: theme.colors.textTertiary }]}>GPA</Text>
+                    <Text style={[styles.detailValue, { color: theme.colors.text }]}>{proof.gpa.toFixed(2)}</Text>
                   </View>
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Threshold</Text>
-                    <Text style={styles.detailValue}>{proof.threshold.toFixed(2)}</Text>
+                    <Text style={[styles.detailLabel, { color: theme.colors.textTertiary }]}>GPA</Text>
+                    <Text style={[styles.detailValue, { color: theme.colors.text }]}>{proof.threshold.toFixed(2)}</Text>
                   </View>
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Generated</Text>
-                    <Text style={styles.detailValue}>{formatDate(proof.timestamp)}</Text>
+                    <Text style={[styles.detailLabel, { color: theme.colors.textTertiary }]}>Generated</Text>
+                    <Text style={[styles.detailValue, { color: theme.colors.text }]}>{formatDate(proof.timestamp)}</Text>
                   </View>
                 </View>
 
                 <TouchableOpacity 
-                  style={styles.codeContainer}
+                  style={[styles.codeContainer, { backgroundColor: theme.colors.background, borderColor: theme.colors.primary }]}
                   onPress={() => copyToClipboard(proof.verificationCode)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.codeLabel}>VERIFICATION CODE</Text>
-                  <Text style={styles.code}>{proof.verificationCode}</Text>
-                  <Text style={styles.copyHint}>
+                  <Text style={[styles.codeLabel, { color: theme.colors.textTertiary }]}>VERIFICATION CODE</Text>
+                  <Text style={[styles.code, { color: theme.colors.primary }]}>{proof.verificationCode}</Text>
+                  <Text style={[styles.copyHint, { color: theme.colors.textSecondary }]}>
                     {copiedCode === proof.verificationCode ? 'Copied!' : 'Tap to copy'}
                   </Text>
                 </TouchableOpacity>
@@ -149,7 +151,7 @@ export default function ProfileScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Settings</Text>
           <NothingButton
             title="Manage Data"
             onPress={() => router.push('/settings')}
@@ -159,8 +161,8 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.developerSection}>
-          <Text style={styles.developerTitle}>Developed by</Text>
-          <Text style={styles.developerName}>Pradyum Mistry</Text>
+          <Text style={[styles.developerTitle, { color: theme.colors.textTertiary }]}>Developed by</Text>
+          <Text style={[styles.developerName, { color: theme.colors.text }]}>Pradyum Mistry</Text>
           
           <NothingButton
             title="Open GitHub"
@@ -184,13 +186,15 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     padding: SPACING.lg,
   },
   title: {
     fontSize: TYPOGRAPHY.fontSize['3xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.white,
     marginBottom: SPACING.xl,
   },
   profileCard: {
@@ -205,27 +209,22 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: COLORS.border,
   },
   avatarText: {
     fontSize: TYPOGRAPHY.fontSize['3xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.background,
   },
   userName: {
     fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
     textAlign: 'center',
   },
   userSubtitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
   },
@@ -235,7 +234,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gray400,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: SPACING.md,
@@ -254,7 +252,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginRight: SPACING.sm,
   },
   resultBadge: {
@@ -264,14 +261,6 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     letterSpacing: 1,
-  },
-  resultPass: {
-    backgroundColor: COLORS.success,
-    color: COLORS.background,
-  },
-  resultFail: {
-    backgroundColor: COLORS.error,
-    color: COLORS.white,
   },
   proofDetails: {
     marginBottom: SPACING.md,
@@ -283,37 +272,30 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
   },
   detailValue: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
   },
   codeContainer: {
-    backgroundColor: COLORS.background,
     borderRadius: 8,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.primary,
     alignItems: 'center',
   },
   codeLabel: {
     fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gray500,
     letterSpacing: 1.5,
     marginBottom: SPACING.xs,
   },
   code: {
     fontSize: TYPOGRAPHY.fontSize['2xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.primary,
     letterSpacing: 4,
     marginBottom: SPACING.xs,
   },
   copyHint: {
     fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gray600,
   },
   developerSection: {
     alignItems: 'center',
@@ -322,7 +304,6 @@ const styles = StyleSheet.create({
   },
   developerTitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: SPACING.xs,
@@ -330,7 +311,6 @@ const styles = StyleSheet.create({
   developerName: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginBottom: SPACING.lg,
   },
   githubButton: {

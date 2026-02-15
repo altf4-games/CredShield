@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '@/constants/theme';
+import { TYPOGRAPHY, SPACING, BORDER_RADIUS } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface IDCardProps {
   name: string;
@@ -9,46 +10,44 @@ interface IDCardProps {
 }
 
 export default function IDCard({ name, gpa, verified = true }: IDCardProps) {
+  const { theme } = useTheme();
+
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[COLORS.surfaceVariant, COLORS.surface]}
-        style={styles.card}
+        colors={[theme.colors.surfaceVariant, theme.colors.surface]}
+        style={[styles.card, { borderColor: theme.colors.border }]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        {/* Card Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>CredShield</Text>
+          <Text style={[styles.logo, { color: theme.colors.text }]}>CredShield</Text>
           {verified && (
-            <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}>VERIFIED</Text>
+            <View style={[styles.verifiedBadge, { backgroundColor: theme.colors.primary }]}>
+              <Text style={[styles.verifiedText, { color: theme.colors.background }]}>VERIFIED</Text>
             </View>
           )}
         </View>
 
-        {/* Name */}
-        <Text style={styles.label}>NAME</Text>
-        <Text style={styles.name}>{name}</Text>
+        <Text style={[styles.label, { color: theme.colors.textSecondary }]}>NAME</Text>
+        <Text style={[styles.name, { color: theme.colors.text }]}>{name}</Text>
 
-        {/* GPA */}
         <View style={styles.gpaSection}>
           <View>
-            <Text style={styles.label}>GPA</Text>
-            <Text style={styles.gpa}>{gpa.toFixed(2)}</Text>
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>GPA</Text>
+            <Text style={[styles.gpa, { color: theme.colors.primary }]}>{gpa.toFixed(2)}</Text>
           </View>
           <View style={styles.chip}>
-            <View style={styles.chipLine} />
-            <View style={styles.chipLine} />
-            <View style={styles.chipLine} />
+            <View style={[styles.chipLine, { backgroundColor: theme.colors.primary }]} />
+            <View style={[styles.chipLine, { backgroundColor: theme.colors.primary }]} />
+            <View style={[styles.chipLine, { backgroundColor: theme.colors.primary }]} />
           </View>
         </View>
 
-        {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>ZERO-KNOWLEDGE PROOF</Text>
-          <Text style={styles.footerDot}>•</Text>
-          <Text style={styles.footerText}>BLOCKCHAIN VERIFIED</Text>
+          <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>ZERO-KNOWLEDGE PROOF</Text>
+          <Text style={[styles.footerDot, { color: theme.colors.textSecondary }]}>•</Text>
+          <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>BLOCKCHAIN VERIFIED</Text>
         </View>
       </LinearGradient>
     </View>
@@ -58,14 +57,13 @@ export default function IDCard({ name, gpa, verified = true }: IDCardProps) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    aspectRatio: 1.586, // Credit card ratio
+    aspectRatio: 1.586,
   },
   card: {
     flex: 1,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
     justifyContent: 'space-between',
   },
   header: {
@@ -76,11 +74,9 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.white,
     letterSpacing: 1,
   },
   verifiedBadge: {
-    backgroundColor: COLORS.primary,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs / 2,
     borderRadius: BORDER_RADIUS.sm,
@@ -88,20 +84,17 @@ const styles = StyleSheet.create({
   verifiedText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.background,
     letterSpacing: 1,
   },
   label: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     fontWeight: TYPOGRAPHY.fontWeight.medium,
-    color: COLORS.gray600,
     letterSpacing: 1.5,
     marginBottom: SPACING.xs / 2,
   },
   name: {
     fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginBottom: SPACING.md,
     flexWrap: 'wrap',
   },
@@ -113,7 +106,6 @@ const styles = StyleSheet.create({
   gpa: {
     fontSize: TYPOGRAPHY.fontSize['4xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.primary,
   },
   chip: {
     gap: 4,
@@ -121,7 +113,6 @@ const styles = StyleSheet.create({
   chipLine: {
     width: 40,
     height: 6,
-    backgroundColor: COLORS.primary,
     borderRadius: 2,
   },
   footer: {
@@ -131,10 +122,8 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gray600,
     letterSpacing: 1,
   },
   footerDot: {
-    color: COLORS.gray600,
   },
 });

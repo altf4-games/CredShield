@@ -1,21 +1,54 @@
-/**
- * Nothing OS-inspired Design Tokens
- * AMOLED Black theme with gray accents
- */
+export type ThemeMode = 'light' | 'dark';
 
-export const COLORS = {
-  // AMOLED Black (pure black for power saving on OLED screens)
+export interface ColorScheme {
+  background: string;
+  surface: string;
+  surfaceVariant: string;
+  surfaceHover: string;
+  
+  primary: string;
+  primaryDim: string;
+  primaryLight: string;
+  
+  text: string;
+  textSecondary: string;
+  textTertiary: string;
+  
+  white: string;
+  gray100: string;
+  gray200: string;
+  gray300: string;
+  gray400: string;
+  gray500: string;
+  gray600: string;
+  gray700: string;
+  gray800: string;
+  gray900: string;
+  
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  
+  overlay: string;
+  shimmer: string;
+  border: string;
+}
+
+const darkColors: ColorScheme = {
   background: '#000000',
   surface: '#0A0A0A',
   surfaceVariant: '#1A1A1A',
   surfaceHover: '#252525',
   
-  // Gray accent (primary)
-  primary: '#A3A3A3',      // gray-400
-  primaryDim: '#737373',   // gray-500
-  primaryLight: '#D4D4D4', // gray-300
+  primary: '#A3A3A3',
+  primaryDim: '#737373',
+  primaryLight: '#D4D4D4',
   
-  // Monochrome scale
+  text: '#FFFFFF',
+  textSecondary: '#A3A3A3',
+  textTertiary: '#737373',
+  
   white: '#FFFFFF',
   gray100: '#F5F5F5',
   gray200: '#E5E5E5',
@@ -27,20 +60,58 @@ export const COLORS = {
   gray800: '#262626',
   gray900: '#171717',
   
-  // Semantic colors
   success: '#4ADE80',
   warning: '#FBBF24',
   error: '#F87171',
   info: '#60A5FA',
   
-  // Transparency overlays
   overlay: 'rgba(0, 0, 0, 0.8)',
   shimmer: 'rgba(255, 255, 255, 0.05)',
   border: 'rgba(163, 163, 163, 0.2)',
-} as const;
+};
+
+const lightColors: ColorScheme = {
+  background: '#FFFFFF',
+  surface: '#F5F5F5',
+  surfaceVariant: '#E5E5E5',
+  surfaceHover: '#D4D4D4',
+  
+  primary: '#525252',
+  primaryDim: '#737373',
+  primaryLight: '#404040',
+  
+  text: '#000000',
+  textSecondary: '#525252',
+  textTertiary: '#737373',
+  
+  white: '#FFFFFF',
+  gray100: '#F5F5F5',
+  gray200: '#E5E5E5',
+  gray300: '#D4D4D4',
+  gray400: '#A3A3A3',
+  gray500: '#737373',
+  gray600: '#525252',
+  gray700: '#404040',
+  gray800: '#262626',
+  gray900: '#171717',
+  
+  success: '#22C55E',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
+  
+  overlay: 'rgba(0, 0, 0, 0.5)',
+  shimmer: 'rgba(0, 0, 0, 0.05)',
+  border: 'rgba(82, 82, 82, 0.2)',
+};
+
+export const COLORS = darkColors;
+
+export const getColors = (mode: ThemeMode): ColorScheme => {
+  return mode === 'dark' ? darkColors : lightColors;
+};
 
 export const TYPOGRAPHY = {
-  // Nothing uses geometric, bold fonts
   fontFamily: {
     regular: 'System',
     medium: 'System',
@@ -125,29 +196,26 @@ export const SHADOWS = {
   },
 } as const;
 
-// Animation durations (ms)
 export const ANIMATION = {
   fast: 150,
   normal: 250,
   slow: 350,
 } as const;
 
-// Common styles
-export const COMMON_STYLES = {
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  centerContent: {
-    flex: 1,
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-  },
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-} as const;
+export interface Theme {
+  colors: ColorScheme;
+  typography: typeof TYPOGRAPHY;
+  spacing: typeof SPACING;
+  borderRadius: typeof BORDER_RADIUS;
+  shadows: typeof SHADOWS;
+  animation: typeof ANIMATION;
+}
+
+export const createTheme = (mode: ThemeMode): Theme => ({
+  colors: getColors(mode),
+  typography: TYPOGRAPHY,
+  spacing: SPACING,
+  borderRadius: BORDER_RADIUS,
+  shadows: SHADOWS,
+  animation: ANIMATION,
+});

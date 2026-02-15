@@ -3,10 +3,11 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { router, useSegments } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { COLORS } from '@/constants/theme';
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 
-export default function RootLayout() {
+function RootLayoutContent() {
   const segments = useSegments();
+  const { theme, isDark } = useTheme();
 
   useEffect(() => {
     checkOnboarding();
@@ -29,12 +30,12 @@ export default function RootLayout() {
 
   return (
     <>
-      <StatusBar style="light" backgroundColor={COLORS.background} />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={theme.colors.background} />
       <Stack
         screenOptions={{
           headerShown: false,
           contentStyle: {
-            backgroundColor: COLORS.background,
+            backgroundColor: theme.colors.background,
           },
           animation: 'none',
         }}
@@ -47,12 +48,20 @@ export default function RootLayout() {
             headerShown: true,
             headerTitle: '',
             headerStyle: {
-              backgroundColor: COLORS.background,
+              backgroundColor: theme.colors.background,
             },
-            headerTintColor: COLORS.white,
+            headerTintColor: theme.colors.text,
           }} 
         />
       </Stack>
     </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutContent />
+    </ThemeProvider>
   );
 }

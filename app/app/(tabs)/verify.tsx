@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { COLORS, TYPOGRAPHY, SPACING, COMMON_STYLES } from '@/constants/theme';
+import { TYPOGRAPHY, SPACING } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import NothingInput from '@/components/NothingInput';
@@ -8,6 +9,7 @@ import ResultModal from '@/components/ResultModal';
 import apiService from '@/services/api';
 
 export default function VerifyScreen() {
+  const { theme } = useTheme();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [verificationResult, setVerificationResult] = useState<any>(null);
@@ -75,10 +77,10 @@ export default function VerifyScreen() {
   };
 
   return (
-    <ScrollView style={COMMON_STYLES.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Verify Proof</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Verify Proof</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.textTertiary }]}>
           Enter the 8-character verification code
         </Text>
 
@@ -105,24 +107,24 @@ export default function VerifyScreen() {
         </NothingCard>
 
         {verificationResult && (
-          <NothingCard style={styles.resultCard}>
-            <Text style={styles.resultTitle}>Verification Result</Text>
+          <NothingCard style={[styles.resultCard, { borderLeftColor: theme.colors.success }]}>
+            <Text style={[styles.resultTitle, { color: theme.colors.text }]}>Verification Result</Text>
             
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Student</Text>
-              <Text style={styles.resultValue}>{verificationResult.metadata.studentName}</Text>
+              <Text style={[styles.resultLabel, { color: theme.colors.textTertiary }]}>Student</Text>
+              <Text style={[styles.resultValue, { color: theme.colors.text }]}>{verificationResult.metadata.studentName}</Text>
             </View>
 
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Threshold</Text>
-              <Text style={styles.resultValue}>{verificationResult.metadata.threshold}</Text>
+              <Text style={[styles.resultLabel, { color: theme.colors.textTertiary }]}>Threshold</Text>
+              <Text style={[styles.resultValue, { color: theme.colors.text }]}>{verificationResult.metadata.threshold}</Text>
             </View>
 
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Result</Text>
+              <Text style={[styles.resultLabel, { color: theme.colors.textTertiary }]}>Result</Text>
               <Text style={[
                 styles.resultValue,
-                verificationResult.metadata.verified ? styles.passText : styles.failText
+                { color: verificationResult.metadata.verified ? theme.colors.success : theme.colors.error }
               ]}>
                 {verificationResult.metadata.verified ? 'VERIFIED ✓' : 'FAILED ✗'}
               </Text>
@@ -130,18 +132,18 @@ export default function VerifyScreen() {
 
             {verificationResult.metadata.timestamp && (
               <>
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
                 <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>Verified On</Text>
-                  <Text style={styles.resultValue}>
+                  <Text style={[styles.resultLabel, { color: theme.colors.textTertiary }]}>Verified On</Text>
+                  <Text style={[styles.resultValue, { color: theme.colors.text }]}>
                     {new Date(verificationResult.metadata.timestamp).toLocaleString()}
                   </Text>
                 </View>
               </>
             )}
 
-            <View style={styles.privacyNote}>
-              <Text style={styles.privacyText}>
+            <View style={[styles.privacyNote, { backgroundColor: theme.colors.surfaceVariant }]}>
+              <Text style={[styles.privacyText, { color: theme.colors.textSecondary }]}>
                 Actual GPA remains private. Only threshold verification is disclosed.
               </Text>
             </View>
@@ -164,18 +166,19 @@ export default function VerifyScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     padding: SPACING.lg,
   },
   title: {
     fontSize: TYPOGRAPHY.fontSize['3xl'],
     fontWeight: TYPOGRAPHY.fontWeight.black,
-    color: COLORS.white,
     marginBottom: SPACING.xs,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     marginBottom: SPACING.xl,
   },
   card: {
@@ -192,12 +195,10 @@ const styles = StyleSheet.create({
   },
   resultCard: {
     borderLeftWidth: 3,
-    borderLeftColor: COLORS.success,
   },
   resultTitle: {
     fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     marginBottom: SPACING.lg,
   },
   resultRow: {
@@ -208,7 +209,6 @@ const styles = StyleSheet.create({
   },
   resultLabel: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray500,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginRight: SPACING.sm,
@@ -217,23 +217,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.white,
     textAlign: 'right',
-  },
-  passText: {
-    color: COLORS.success,
-  },
-  failText: {
-    color: COLORS.error,
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
     marginVertical: SPACING.md,
   },
   hashText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.primary,
     fontFamily: 'monospace',
     flex: 1,
     marginLeft: SPACING.md,
@@ -241,12 +232,10 @@ const styles = StyleSheet.create({
   privacyNote: {
     marginTop: SPACING.md,
     padding: SPACING.sm,
-    backgroundColor: COLORS.surfaceVariant,
     borderRadius: 4,
   },
   privacyText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.gray400,
     textAlign: 'center',
   },
 });
