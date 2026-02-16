@@ -98,6 +98,91 @@ class ApiService {
   }
 
   /**
+   * Get student profile by userId
+   */
+  async getStudentProfile(userId: string): Promise<any> {
+    try {
+      const response = await axios.get(`${API_URL}/students/${userId}`);
+      return response.data.student;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      console.error('Get student profile error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Failed to get student profile');
+    }
+  }
+
+  /**
+   * Create or update student profile
+   */
+  async updateStudentProfile(userId: string, profileData: any): Promise<any> {
+    try {
+      const response = await axios.post(`${API_URL}/students`, {
+        userId,
+        ...profileData,
+      });
+      return response.data.student;
+    } catch (error: any) {
+      console.error('Update student profile error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Failed to update student profile');
+    }
+  }
+
+  /**
+   * Update leaderboard opt-in preferences
+   */
+  async updateLeaderboardOptIn(userId: string, optIn: boolean, showAnonymous: boolean = false): Promise<any> {
+    try {
+      const response = await axios.put(`${API_URL}/students/${userId}/opt-in`, {
+        optIn,
+        showAnonymous,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Update leaderboard opt-in error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Failed to update leaderboard preferences');
+    }
+  }
+
+  /**
+   * Get leaderboard with optional filters
+   */
+  async getLeaderboard(filters?: { branch?: string; year?: string; eligibility?: string }): Promise<any[]> {
+    try {
+      const params = new URLSearchParams();
+      if (filters?.branch) params.append('branch', filters.branch);
+      if (filters?.year) params.append('year', filters.year);
+      if (filters?.eligibility) params.append('eligibility', filters.eligibility);
+
+      const queryString = params.toString();
+      const url = queryString ? `${API_URL}/leaderboard?${queryString}` : `${API_URL}/leaderboard`;
+
+      const response = await axios.get(url);
+      return response.data.leaderboard;
+    } catch (error: any) {
+      console.error('Get leaderboard error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Failed to get leaderboard');
+    }
+  }
+
+  /**
+   * Get student's rank in leaderboard
+   */
+  async getStudentRank(userId: string): Promise<number | null> {
+    try {
+      const response = await axios.get(`${API_URL}/leaderboard/rank/${userId}`);
+      return response.data.rank;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      console.error('Get student rank error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Failed to get student rank');
+    }
+  }
+
+  /**
    * Health check
    */
   async checkHealth(): Promise<boolean> {

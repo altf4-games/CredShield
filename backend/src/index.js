@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const proofRoutes = require('./routes/proof');
+const studentRoutes = require('./routes/students');
+const leaderboardRoutes = require('./routes/leaderboard');
 const geminiService = require('./services/geminiService');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
@@ -23,7 +25,9 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
-      proof: '/api/proof'
+      proof: '/api/proof',
+      students: '/api/students',
+      leaderboard: '/api/leaderboard'
     }
   });
 });
@@ -43,6 +47,8 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/proof', proofRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

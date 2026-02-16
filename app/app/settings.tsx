@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { TYPOGRAPHY, SPACING } from '@/constants/theme';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -7,11 +8,62 @@ import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import ConfirmModal from '@/components/ConfirmModal';
 import { router } from 'expo-router';
+import ApiService from '@/services/api';
 
 export default function SettingsScreen() {
   const { theme } = useTheme();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [leaderboardOptIn, setLeaderboardOptIn] = useState(false);
+  const [showAnonymous, setShowAnonymous] = useState(false);
+
+  // Load leaderboard settings on mount
+  useFocusEffect(
+    useCallback(() => {
+      loadLeaderboardSettings();
+    }, [])
+  );
+
+  const loadLeaderboardSettings = async () => {
+    try {
+      const userId = await SecureStore.getItemAsync('userId');
+      if (!userId) return;
+
+      const profile = await ApiService.getStudentProfile(userId);
+      if (profile) {
+        setLeaderboardOptIn(profile.leaderboardOptIn || false);
+        setShowAnonymous(profile.showAnonymous || false);
+      }
+    } catch (error) {
+      console.error('Error loading leaderboard settings:', error);
+    }
+  };
+
+  const handleLeaderboardOptInChange = async (value: boolean) => {
+    try {
+      const userId = await SecureStore.getItemAsync('userId');
+      if (!userId) return;
+
+      setLeaderboardOptIn(value);
+      await ApiService.updateLeaderboardOptIn(userId, value, showAnonymous);
+    } catch (error) {
+      console.error('Error updating leaderboard opt-in:', error);
+      setLeaderboardOptIn(!value);
+    }
+  };
+
+  const handleAnonymousChange = async (value: boolean) => {
+    try {
+      const userId = await SecureStore.getItemAsync('userId');
+      if (!userId) return;
+
+      setShowAnonymous(value);
+      await ApiService.updateLeaderboardOptIn(userId, leaderboardOptIn, value);
+    } catch (error) {
+      console.error('Error updating anonymous setting:', error);
+      setShowAnonymous(!value);
+    }
+  };
 
   const handleClearCache = async () => {
     try {
@@ -31,6 +83,51 @@ export default function SettingsScreen() {
         <Text style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
         <Text style={[styles.subtitle, { color: theme.colors.textTertiary }]}>Manage your data and preferences</Text>
 
+        {/* Leaderboard Settings */}
+        <NothingCard style={styles.card}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Leaderboard Settings</Text>
+          <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
+            Control your leaderboard visibility and privacy
+          </Text>
+
+          <View style={styles.settingRow}>
+            <View style={styles.settingText}>
+              <Text style={[styles.settingLabel, { color: theme.colors.text }]}>
+                Join Leaderboard
+              </Text>
+              <Text style={[styles.settingDescription, { color: theme.colors.textTertiary }]}>
+                Appear on the public leaderboard
+              </Text>
+            </View>
+            <Switch
+              value={leaderboardOptIn}
+              onValueChange={handleLeaderboardOptInChange}
+              trackColor={{ false: theme.colors.surfaceVariant, true: theme.colors.primary }}
+              thumbColor={theme.colors.white}
+            />
+          </View>
+
+          {leaderboardOptIn && (
+            <View style={[styles.settingRow, { marginTop: SPACING.md, borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: SPACING.md }]}>
+              <View style={styles.settingText}>
+                <Text style={[styles.settingLabel, { color: theme.colors.text }]}>
+                  Show Anonymously
+                </Text>
+                <Text style={[styles.settingDescription, { color: theme.colors.textTertiary }]}>
+                  Display only your initials
+                </Text>
+              </View>
+              <Switch
+                value={showAnonymous}
+                onValueChange={handleAnonymousChange}
+                trackColor={{ false: theme.colors.surfaceVariant, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
+              />
+            </View>
+          )}
+        </NothingCard>
+
+        {/* Data Management */}
         <NothingCard style={styles.card}>
           <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Data Management</Text>
           <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
@@ -154,5 +251,22 @@ const styles = StyleSheet.create({
   warningText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     lineHeight: TYPOGRAPHY.lineHeight.relaxed * TYPOGRAPHY.fontSize.sm,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  settingText: {
+    flex: 1,
+    marginRight: SPACING.md,
+  },
+  settingLabel: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    marginBottom: SPACING.xs / 2,
+  },
+  settingDescription: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
   },
 });
