@@ -193,6 +193,50 @@ class ApiService {
       return false;
     }
   }
+
+  /**
+   * Get candidates for recruiter swipe
+   */
+  async getCandidates(recruiterId: string): Promise<any> {
+    try {
+      const response = await axios.get(`${API_URL}/recruiter/candidates/${recruiterId}`);
+      return response.data.candidates;
+    } catch (error: any) {
+      console.error('Get candidates error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.error || 'Failed to get candidates');
+    }
+  }
+
+  /**
+   * Save recruiter swipe action
+   */
+  async saveSwipe(recruiterId: string, studentUserId: string, action: 'skip' | 'interested'): Promise<any> {
+    try {
+      const response = await axios.post(`${API_URL}/recruiter/interactions`, {
+        recruiterId,
+        studentUserId,
+        action,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Save swipe error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.error || 'Failed to save swipe');
+    }
+  }
+
+  /**
+   * Get shortlisted candidates
+   */
+  async getShortlisted(recruiterId: string): Promise<any> {
+    try {
+      const response = await axios.get(`${API_URL}/recruiter/shortlisted/${recruiterId}`);
+      return response.data.candidates;
+    } catch (error: any) {
+      console.error('Get shortlisted error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.error || 'Failed to get shortlisted');
+    }
+  }
 }
 
-export default new ApiService();
+const apiService = new ApiService();
+export default apiService;

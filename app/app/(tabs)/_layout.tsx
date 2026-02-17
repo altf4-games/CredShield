@@ -4,10 +4,12 @@ import { Platform } from 'react-native';
 import { TYPOGRAPHY } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUserMode } from '@/contexts/UserModeContext';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function TabLayout() {
   const { theme } = useTheme();
+  const { isRecruiter } = useUserMode();
 
   return (
     <Tabs
@@ -50,6 +52,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* Generate tab - Student only */}
       <Tabs.Screen
         name="generate"
         options={{
@@ -57,8 +60,10 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="shield-checkmark-outline" size={size} color={color} />
           ),
+          href: isRecruiter ? null : '/(tabs)/generate',
         }}
       />
+      {/* Verify tab - Recruiter only */}
       <Tabs.Screen
         name="verify"
         options={{
@@ -66,6 +71,18 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="scan-outline" size={size} color={color} />
           ),
+          href: isRecruiter ? '/(tabs)/verify' : null,
+        }}
+      />
+      {/* Recruit tab - Recruiter only */}
+      <Tabs.Screen
+        name="recruit"
+        options={{
+          title: 'Recruit',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people-outline" size={size} color={color} />
+          ),
+          href: isRecruiter ? '/(tabs)/recruit' : null,
         }}
       />
       <Tabs.Screen

@@ -8,6 +8,7 @@ import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import IDCard from '@/components/IDCard';
 import StatusDot from '@/components/StatusDot';
+import ModeToggle from '@/components/ModeToggle';
 import { router } from 'expo-router';
 import apiService from '@/services/api';
 
@@ -78,6 +79,9 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>Quick Actions</Text>
+          
+          {/* Mode Toggle */}
+          <ModeToggle />
           
           <NothingCard style={styles.actionCard}>
             <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Generate Proof</Text>

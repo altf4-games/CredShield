@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const proofRoutes = require('./routes/proof');
 const studentRoutes = require('./routes/students');
 const leaderboardRoutes = require('./routes/leaderboard');
+const recruiterRoutes = require('./routes/recruiter');
 const geminiService = require('./services/geminiService');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
@@ -27,7 +28,8 @@ app.get('/', (req, res) => {
       health: '/health',
       proof: '/api/proof',
       students: '/api/students',
-      leaderboard: '/api/leaderboard'
+      leaderboard: '/api/leaderboard',
+      recruiter: '/api/recruiter'
     }
   });
 });
@@ -49,6 +51,7 @@ app.get('/health', (req, res) => {
 app.use('/api/proof', proofRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/recruiter', recruiterRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -59,4 +62,3 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Contract: ${process.env.CONTRACT_ADDRESS || 'Not configured'}`);
 });
-

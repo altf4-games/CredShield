@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { router, useSegments } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import { UserModeProvider } from '@/contexts/UserModeContext';
 
 function RootLayoutContent() {
   const segments = useSegments();
@@ -60,8 +61,10 @@ function RootLayoutContent() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <RootLayoutContent />
-    </ThemeProvider>
+    <UserModeProvider>
+      <ThemeProvider>
+        <RootLayoutContent />
+      </ThemeProvider>
+    </UserModeProvider>
   );
 }

@@ -29,6 +29,21 @@ CREATE INDEX IF NOT EXISTS idx_students_user_id ON students(user_id);
 -- Create index on leaderboard_opt_in for leaderboard queries
 CREATE INDEX IF NOT EXISTS idx_students_leaderboard ON students(leaderboard_opt_in, gpa DESC);
 
+-- Recruiter interactions table
+CREATE TABLE IF NOT EXISTS recruiter_interactions (
+  id SERIAL PRIMARY KEY,
+  recruiter_id VARCHAR(255) NOT NULL,  -- Maps to recruiter user identifier
+  student_user_id VARCHAR(255) NOT NULL,  -- Maps to student user_id
+  action VARCHAR(20) NOT NULL CHECK (action IN ('skip', 'interested')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(recruiter_id, student_user_id)  -- Each recruiter can only interact once per student
+);
+
+-- Create indexes for recruiter interactions
+CREATE INDEX IF NOT EXISTS idx_recruiter_interactions_recruiter ON recruiter_interactions(recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_recruiter_interactions_student ON recruiter_interactions(student_user_id);
+CREATE INDEX IF NOT EXISTS idx_recruiter_interactions_action ON recruiter_interactions(recruiter_id, action);
+
 -- Privacy-aware leaderboard view
 -- This view NEVER exposes exact GPAs, only ranges
 CREATE OR REPLACE VIEW leaderboard_view AS
