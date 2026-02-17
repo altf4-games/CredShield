@@ -7,6 +7,8 @@ async function getCandidates(recruiterId) {
   const sql = getConnection();
   
   try {
+    console.log(`[SERVICE] getCandidates called for recruiterId: ${recruiterId}`);
+    
     const result = await sql`
       SELECT 
         s.user_id,
@@ -40,6 +42,11 @@ async function getCandidates(recruiterId) {
       LIMIT 50
     `;
 
+    console.log(`[SERVICE] Query returned ${result.length} rows`);
+    if (result.length > 0) {
+      console.log('[SERVICE] Sample result:', result[0].name, result[0].user_id);
+    }
+
     return result.map(student => ({
       userId: student.user_id,
       name: student.name,
@@ -52,7 +59,7 @@ async function getCandidates(recruiterId) {
       isVerified: student.is_verified,
     }));
   } catch (error) {
-    console.error('Error getting candidates:', error);
+    console.error('[SERVICE] Error getting candidates:', error);
     throw error;
   }
 }

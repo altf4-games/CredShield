@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { TYPOGRAPHY, SPACING } from '@/constants/theme';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUserMode } from '@/contexts/UserModeContext';
 import NothingCard from '@/components/NothingCard';
 import NothingButton from '@/components/NothingButton';
 import IDCard from '@/components/IDCard';
@@ -14,6 +15,7 @@ import apiService from '@/services/api';
 
 export default function HomeScreen() {
   const { theme } = useTheme();
+  const { isRecruiter } = useUserMode();
   const [userData, setUserData] = useState<{name: string, gpa: number, verificationCode?: string} | null>(null);
   const [backendOnline, setBackendOnline] = useState(false);
 
@@ -83,30 +85,34 @@ export default function HomeScreen() {
           {/* Mode Toggle */}
           <ModeToggle />
           
-          <NothingCard style={styles.actionCard}>
-            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Generate Proof</Text>
-            <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
-              Capture your academic document and generate a zero-knowledge proof
-            </Text>
-            <NothingButton 
-              title="Start" 
-              onPress={() => router.push('/(tabs)/generate')}
-              style={styles.actionButton}
-            />
-          </NothingCard>
+          {!isRecruiter && (
+            <NothingCard style={styles.actionCard}>
+              <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Generate Proof</Text>
+              <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
+                Capture your academic document and generate a zero-knowledge proof
+              </Text>
+              <NothingButton 
+                title="Start" 
+                onPress={() => router.push('/(tabs)/generate')}
+                style={styles.actionButton}
+              />
+            </NothingCard>
+          )}
 
-          <NothingCard style={styles.actionCard}>
-            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Verify Proof</Text>
-            <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
-              Enter verification code to check a proof on the blockchain
-            </Text>
-            <NothingButton 
-              title="Verify" 
-              onPress={() => router.push('/(tabs)/verify')}
-              variant="secondary"
-              style={styles.actionButton}
-            />
-          </NothingCard>
+          {isRecruiter && (
+            <NothingCard style={styles.actionCard}>
+              <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Verify Proof</Text>
+              <Text style={[styles.cardDescription, { color: theme.colors.textTertiary }]}>
+                Enter verification code to check a proof on the blockchain
+              </Text>
+              <NothingButton 
+                title="Verify" 
+                onPress={() => router.push('/(tabs)/verify')}
+                variant="secondary"
+                style={styles.actionButton}
+              />
+            </NothingCard>
+          )}
         </View>
       </View>
     </ScrollView>

@@ -9,7 +9,14 @@ const recruiterService = require('../services/recruiterService');
 router.get('/candidates/:recruiterId', async (req, res) => {
   try {
     const { recruiterId } = req.params;
+    console.log(`[RECRUITER] Get candidates request for recruiterId: ${recruiterId}`);
+    
     const candidates = await recruiterService.getCandidates(recruiterId);
+    
+    console.log(`[RECRUITER] Found ${candidates.length} candidates for recruiterId: ${recruiterId}`);
+    if (candidates.length > 0) {
+      console.log('[RECRUITER] First candidate:', candidates[0].name);
+    }
     
     res.json({
       success: true,
@@ -17,7 +24,7 @@ router.get('/candidates/:recruiterId', async (req, res) => {
       count: candidates.length,
     });
   } catch (error) {
-    console.error('Get candidates error:', error);
+    console.error('[RECRUITER] Get candidates error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to get candidates',

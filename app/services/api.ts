@@ -199,10 +199,18 @@ class ApiService {
    */
   async getCandidates(recruiterId: string): Promise<any> {
     try {
-      const response = await axios.get(`${API_URL}/recruiter/candidates/${recruiterId}`);
+      const url = `${API_URL}/recruiter/candidates/${recruiterId}`;
+      console.log('[API] GET', url);
+      
+      const response = await axios.get(url);
+      
+      console.log('[API] Response status:', response.status);
+      console.log('[API] Candidates count:', response.data.candidates?.length || 0);
+      
       return response.data.candidates;
     } catch (error: any) {
-      console.error('Get candidates error:', error.response?.data || error.message);
+      console.error('[API] Get candidates error:', error.response?.data || error.message);
+      console.error('[API] Error status:', error.response?.status);
       throw new Error(error.response?.data?.error || 'Failed to get candidates');
     }
   }

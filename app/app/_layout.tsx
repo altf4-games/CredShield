@@ -1,70 +1,39 @@
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { router, useSegments } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { UserModeProvider } from '@/contexts/UserModeContext';
+import { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import { View } from 'react-native';
 
-function RootLayoutContent() {
-  const segments = useSegments();
-  const { theme, isDark } = useTheme();
-
-  useEffect(() => {
-    checkOnboarding();
-  }, []);
-
-  const checkOnboarding = async () => {
-    try {
-      const completed = await SecureStore.getItemAsync('onboardingCompleted');
-      const inOnboarding = segments[0] === 'onboarding';
-      
-      if (!completed && !inOnboarding) {
-        router.replace('/onboarding');
-      } else if (completed && inOnboarding) {
-        router.replace('/(tabs)');
-      }
-    } catch (error) {
-      console.log('Onboarding check error:', error);
-    }
-  };
-
-  return (
-    <>
-      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={theme.colors.background} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: {
-            backgroundColor: theme.colors.background,
-          },
-          animation: 'none',
-        }}
-      >
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen 
-          name="settings" 
-          options={{ 
-            headerShown: true,
-            headerTitle: '',
-            headerStyle: {
-              backgroundColor: theme.colors.background,
-            },
-            headerTintColor: theme.colors.text,
-          }} 
-        />
-      </Stack>
-    </>
-  );
-}
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [loaded] = useFonts({
+    // Add custom fonts here if needed
+  });
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
+
   return (
-    <UserModeProvider>
-      <ThemeProvider>
-        <RootLayoutContent />
-      </ThemeProvider>
-    </UserModeProvider>
+    <ThemeProvider>
+      <UserModeProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: false }} />
+        </Stack>
+      </UserModeProvider>
+    </ThemeProvider>
   );
 }

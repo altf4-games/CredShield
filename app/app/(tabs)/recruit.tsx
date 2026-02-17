@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Dimensions, Platform } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { TYPOGRAPHY, SPACING } from '@/constants/theme';
 import * as SecureStore from 'expo-secure-store';
+import * as Application from 'expo-application';
 import Swiper from 'react-native-deck-swiper';
 import CandidateCard from '@/components/CandidateCard';
 import NothingCard from '@/components/NothingCard';
+import NothingButton from '@/components/NothingButton';
 import { Ionicons } from '@expo/vector-icons';
 import ApiService from '@/services/api';
+import { router } from 'expo-router';
 
 const { height } = Dimensions.get('window');
 
@@ -28,26 +31,65 @@ export default function RecruitScreen() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [noUserId, setNoUserId] = useState(false);
   const swiperRef = useRef<any>(null);
 
   useEffect(() => {
     loadCandidates();
   }, []);
 
+  const getRecruiterId = async (): Promise<string | null> => {
+    try {
+      // 1. Try to get authenticated user ID
+      let id = await SecureStore.getItemAsync('userId');
+      if (id) return id;
+
+      // 2. Fallback to Device ID for guest recruiters
+      if (Platform.OS === 'android') {
+        // Use androidId or getAndroidIdAsync depending on version, safely
+        id = Application.getAndroidId();
+      } else if (Platform.OS === 'ios') {
+        id = await Application.getIosIdForVendorAsync();
+      }
+
+      if (id) {
+        console.log('[RECRUIT] Using Device ID as fallback:', id);
+        return `guest_${id}`;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error getting recruiter ID:', error);
+      return null;
+    }
+  };
+
   const loadCandidates = async () => {
     try {
       setLoading(true);
-      const recruiterId = await SecureStore.getItemAsync('userId');
+      setNoUserId(false);
+      
+      const recruiterId = await getRecruiterId();
+      
+      console.log('[RECRUIT] Loading candidates...');
+      console.log('[RECRUIT] Recruiter ID:', recruiterId);
+      console.log('[RECRUIT] API URL:', 'https://credshield.vercel.app/api');
+      
       if (!recruiterId) {
-        console.error('No recruiter ID found');
+        console.error('[RECRUIT] No recruiter ID found (even fallback failed)');
+        setNoUserId(true);
         setLoading(false);
         return;
       }
       
       const data = await ApiService.getCandidates(recruiterId);
+      console.log('[RECRUIT] Candidates received:', data.length);
+      if (data.length > 0) {
+        console.log('[RECRUIT] First candidate:', data[0].name);
+      }
       setCandidates(data);
     } catch (error) {
-      console.error('Error loading candidates:', error);
+      console.error('[RECRUIT] Error loading candidates:', error);
       // Keep empty array on error
       setCandidates([]);
     } finally {
@@ -57,7 +99,7 @@ export default function RecruitScreen() {
 
   const handleSwipeLeft = async (cardIndex: number) => {
     try {
-      const recruiterId = await SecureStore.getItemAsync('userId');
+      const recruiterId = await getRecruiterId();
       if (!recruiterId) return;
       
       console.log('Swiped left on:', candidates[cardIndex].name);
@@ -69,7 +111,7 @@ export default function RecruitScreen() {
 
   const handleSwipeRight = async (cardIndex: number) => {
     try {
-      const recruiterId = await SecureStore.getItemAsync('userId');
+      const recruiterId = await getRecruiterId();
       if (!recruiterId) return;
       
       console.log('Swiped right on:', candidates[cardIndex].name);
@@ -104,6 +146,33 @@ export default function RecruitScreen() {
           <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
             Loading candidates...
           </Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Show special message ONLY if fallback failed
+  if (noUserId) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.content}>
+          <View style={styles.emptyContainer}>
+            <NothingCard style={styles.emptyCard}>
+              <Ionicons name="alert-circle-outline" size={64} color={theme.colors.error} />
+              <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
+                Access Error
+              </Text>
+              <Text style={[styles.emptyText, { color: theme.colors.textTertiary }]}>
+                Could not identify your device or profile. Please create a profile to continue.
+              </Text>
+              <NothingButton
+                title="Create Profile"
+                onPress={() => router.push('/(tabs)' as any)}
+                variant="primary"
+                style={styles.ctaButton}
+              />
+            </NothingCard>
+          </View>
         </View>
       </View>
     );
@@ -289,5 +358,8 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: TYPOGRAPHY.fontSize.base,
     textAlign: 'center',
+  },
+  ctaButton: {
+    marginTop: SPACING.lg,
   },
 });
